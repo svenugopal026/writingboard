@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Freehand Drawing Tool with Color Pen</title> 
+    <title>Freehand Drawing Tool with Color Pen</title> 
   <h2>Dr S Venu Gopal</h2>
     <style>
         body {
@@ -31,7 +31,7 @@
     </style>
 </head>
 <body>
-    <h1>Freehand Drawing with Color Pen</h1>
+    <h1>Freehand Drawing with Eraser</h1>
     <div class="tools">
         <label>
             Pen Color:
@@ -41,10 +41,11 @@
             Pen Size:
             <input type="number" id="pen-size" min="1" max="20" value="5">
         </label>
+        <button id="eraser">Toggle Eraser</button>
         <button id="clear-board">Clear Board</button>
         <button id="save-pdf">Save as PDF</button>
     </div>
-    <canvas id="drawing-board" width="1500" height="1000"></canvas>
+    <canvas id="drawing-board" width="800" height="500"></canvas>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
@@ -54,9 +55,11 @@
         const penSizeInput = document.getElementById('pen-size');
         const clearButton = document.getElementById('clear-board');
         const saveButton = document.getElementById('save-pdf');
+        const eraserButton = document.getElementById('eraser');
 
         // Initialize drawing state
         let drawing = false;
+        let isEraser = false; // Eraser mode off by default
         let penColor = penColorInput.value;
         let penSize = parseInt(penSizeInput.value);
 
@@ -73,6 +76,12 @@
         // Update pen settings
         penColorInput.addEventListener('input', () => penColor = penColorInput.value);
         penSizeInput.addEventListener('input', () => penSize = parseInt(penSizeInput.value));
+
+        // Toggle eraser
+        eraserButton.addEventListener('click', () => {
+            isEraser = !isEraser;
+            eraserButton.textContent = isEraser ? 'Eraser ON' : 'Toggle Eraser';
+        });
 
         // Clear canvas
         clearButton.addEventListener('click', () => {
@@ -98,7 +107,7 @@
         function draw(e) {
             if (!drawing) return;
 
-            ctx.strokeStyle = penColor;
+            ctx.strokeStyle = isEraser ? '#FFFFFF' : penColor; // Set to white if erasing
             ctx.lineWidth = penSize;
 
             ctx.lineTo(getX(e), getY(e));
