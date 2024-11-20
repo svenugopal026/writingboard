@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freehand Pen Drawing Board</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        canvas {
+            border: 2px solid black;
+            cursor: crosshair;
+        }
+        .tools {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 15px;
+        }
+        button, input {
+            padding: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Freehand Pen Drawing Board</h1>
+    <div class="tools">
+        <label>
+            Pen Color:
+            <input type="color" id="pen-color" value="#000000">
+        </label>
+        <label>
+            Pen Size:
+            <input type="number" id="pen-size" min="1" max="20" value="5">
+        </label>
+        <button id="clear">Clear</button>
+        <button id="save">Save as PDF</button>
+    </div>
+    <canvas id="board" width="800" height="600"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script>
+        // Select elements
+        const canvas = document.getElementById('board');
+        const ctx = canvas.getContext('2d');
+        const penColorInput = document.getElementById('pen-color');
+        const penSizeInput = document.getElementById('pen-size');
+        const clearButton = document.getElementById('clear');
+        const saveButton = document.getElementById('save');
+
+        // Initialize drawing state
+        let drawing = false;
+        let penColor = penColorInput.value;
+        let penSize = parseInt(penSizeInput.value);
+
+        // Set up canvas context
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Event listeners for drawing
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Update pen settings
+        penColorInput.addEventListener('input', () => penColor = penColorInput.value);
+        penSizeInput.addEventListener('input', () => penSize = parseInt(penSizeInput.value));
+
+        // Clear canvas
+        clearButton.addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+
+        // Save canvas as PDF
+        saveButton.addEventListener('click', () => {
+            const pdf = new jsPDF();
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 10, 10, 190, 0); // Fit image in PDF dimensions
+            pdf.save('freehand_drawing.pdf');
+        });
+
+        // Drawing functions
+        function startDrawing(e) {
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(getX(e), getY(e));
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+
+            ctx.strokeStyle = penColor;
+            ctx.lineWidth = penSize;
+
+            ctx.lineTo(getX(e), getY(e));
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (!drawing) return;
+            drawing = false;
+            ctx.closePath();
+        }
+
+        // Helper: Get mouse position relative to canvas
+        function getX(e) {
+            return e.clientX - canvas.offsetLeft;
+        }
+
+        function getY(e) {
+            return e.clientY - canvas.offsetTop;
+        }
+    </script>
+</body>
+</html>
